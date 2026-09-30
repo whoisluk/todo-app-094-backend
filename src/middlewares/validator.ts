@@ -1,31 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
+import type { RegisterRequest, LoginRequest } from '../types/auth';
+import type { CreateTodoRequest, UpdateTodoRequest } from '../types/todo';
+import { sendError } from '../utils/response';
 
 export const validateRegister = (req: Request, res: Response, next: NextFunction): void => {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-        res.status(400).json({ success: false, message: 'Username, email, dan password wajib diisi!' });
+    const payload: RegisterRequest = req.body;
+
+    if (!payload.username || !payload.email || !payload.password) {
+        sendError(res, 'Username, email, dan password wajib diisi!', 400);
         return;
     }
-    if (!email.includes('@')) {
-        res.status(400).json({ success: false, message: 'Format email tidak valid!' });
+    if (!payload.email.includes('@')) {
+        sendError(res, 'Format email tidak valid!', 400);
         return;
     }
     next();
 };
 
 export const validateLogin = (req: Request, res: Response, next: NextFunction): void => {
-    const { username, password } = req.body;
-    if (!username || !password) {
-        res.status(400).json({ success: false, message: 'Username dan password wajib diisi!' });
+    const payload: LoginRequest = req.body;
+
+    if (!payload.username || !payload.password) {
+        sendError(res, 'Username dan password wajib diisi!', 400);
         return;
     }
     next();
 };
 
 export const validateTodo = (req: Request, res: Response, next: NextFunction): void => {
-    const { task } = req.body;
-    if (!task || typeof task !== 'string') {
-        res.status(400).json({ success: false, message: 'Task wajib diisi dengan format string!' });
+    const payload: CreateTodoRequest = req.body;
+
+    if (!payload.task || typeof payload.task !== 'string') {
+        sendError(res, 'Task wajib diisi dengan format string!', 400);
         return;
     }
     next();
@@ -33,23 +39,23 @@ export const validateTodo = (req: Request, res: Response, next: NextFunction): v
 
 // Validasi untuk update todo — task dan is_completed boleh dikirim bersamaan
 export const validateUpdateTodo = (req: Request, res: Response, next: NextFunction): void => {
-    const { task, is_completed } = req.body;
+    const payload: UpdateTodoRequest = req.body;
 
     // Minimal salah satu harus dikirim
-    if (task === undefined && is_completed === undefined) {
-        res.status(400).json({ success: false, message: 'Isi minimal task atau is_completed!' });
+    if (payload.task === undefined && payload.is_completed === undefined) {
+        sendError(res, 'Isi minimal task atau is_completed!', 400);
         return;
     }
 
     // Jika task dikirim, harus berupa string
-    if (task !== undefined && typeof task !== 'string') {
-        res.status(400).json({ success: false, message: 'Task harus berupa string!' });
+    if (payload.task !== undefined && typeof payload.task !== 'string') {
+        sendError(res, 'Task harus berupa string!', 400);
         return;
     }
 
     // Jika is_completed dikirim, harus berupa boolean
-    if (is_completed !== undefined && typeof is_completed !== 'boolean') {
-        res.status(400).json({ success: false, message: 'is_completed harus berupa true atau false!' });
+    if (payload.is_completed !== undefined && typeof payload.is_completed !== 'boolean') {
+        sendError(res, 'is_completed harus berupa true atau false!', 400);
         return;
     }
 
